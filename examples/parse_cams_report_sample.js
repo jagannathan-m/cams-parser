@@ -1,4 +1,4 @@
-let CamsPDFParser = require ('./CamsPDFParser.js');
+let CamsPDFParser = require ('../CamsPDFParser.js');
 
 let pdfParser;
 

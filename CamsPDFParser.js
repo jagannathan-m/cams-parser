@@ -1,9 +1,13 @@
-let fs = require('fs'),
+const fs = require('fs'),
     PDFParser = require("pdf2json/PDFParser"),
     log = require("loglevel"),
     MongoClient = require('mongodb').MongoClient,
     co = require('co'),
-    assert = require('assert');
+    assert = require('assert'),
+    config = require('config');
+
+    const mongodb_uri = config.mongodb.uri;
+const dbclient = new MongoClient(mongodb_uri, { useUnifiedTopology: true });
 
 class CamsPDFParser extends PDFParser {
     constructor({
@@ -122,10 +126,11 @@ class CamsPDFParser extends PDFParser {
         // Extract Folio details
         let folioBlocks = this._extractFolioLines(pdfParsedLines)
         let extracter = {
-            OpeningBalance: /Opening Unit Balance: ([^#]*)#/,
+            OpeningBalance: /Opening Unit Balance: ([\d.]*)/,
         };
         // console.log(folioBlocks);
         for (let i in folioBlocks) {
+        // for(let i=0; i < 3; i++) {
             let block = folioBlocks[i];
             // remove margin note
             for (let i in block) {
@@ -145,9 +150,8 @@ class CamsPDFParser extends PDFParser {
                 fundName,
                 advisor,
                 registrar
-            } = this._extractFundInfo(fundHouse, block[2]);
-
-            let openingBalance = block[3].match(extracter.OpeningBalance);
+            } = this._extractFundInfo(fundHouse, block[2], block[3]);
+            let openingBalance = (block[3] + block[4]).match(extracter.OpeningBalance);
             if (openingBalance) {
                 openingBalance = openingBalance[1].replace(',', '');
             }
@@ -165,11 +169,13 @@ class CamsPDFParser extends PDFParser {
                     continue;
                 }
                 if ((parseFloat(txn.unitBalance) - parseFloat(openingBalance) - parseFloat(txn.units)).toFixed() != 0) {
-                    log.warn('Unable to balance the transaction line <' + txn.txnLine + '> for fund "' + rawFundName + '"')
+                    log.warn('Unable to balance the transaction line <' + txn.txnline + '> for fund "' + rawFundName + '"')
                 }
 
                 txnArray.push(txn);
-                openingBalance = parseFloat(openingBalance) + parseFloat(txn.units);
+                if (txn.units) {
+                    openingBalance = parseFloat(openingBalance) + parseFloat(txn.units);
+                }
             }
 
             if (this.suppressNoTxnFolio === true && txnArray.length === 0) {
@@ -279,17 +285,16 @@ class CamsPDFParser extends PDFParser {
         let blockStart = /^Folio No/,
             blockEnd = /^Closing Unit Balance/,
             pageBreakStart = /^Page \d+ of \d+/,
-            pageBreakEnd = /^\(INR\)#\(INR\)#Balance/;
+            pageBreakEnd = /^\(INR\)#\(INR\)#Balance/,
+            fundHouseRegex = /(.*(Mutual Fund)\s*(\(idf\))*)#$/i;
 
         for (let i in pdfParsedLines) {
             let line = unescape(pdfParsedLines[i]);
             if (pushFlag === 'NotInFolio') {
                 if (line.match(blockStart)) {
                     pushFlag = 'InFolio';
-                    let fundHouse = pdfParsedLines[i - 1].match(/^([^#]*)/);
-                    if (fundHouse &&
-                        this.fundHouses.has(unescape(fundHouse[1]).toLowerCase())
-                    ) {
+                    let fundHouse = pdfParsedLines[i - 1].match(fundHouseRegex);
+                    if (fundHouse) {
                         currentFundHouse = fundHouse[1];
                     } else if (pdfParsedLines[i - 1].match(pageBreakEnd)) {
                         let pageBreak = 1,
@@ -298,10 +303,8 @@ class CamsPDFParser extends PDFParser {
                             j++;
                             if (pdfParsedLines[i - j].match(pageBreakStart)) {
                                 j++
-                                fundHouse = pdfParsedLines[i - j].match(/^([^#]*)/);
-                                if (fundHouse &&
-                                    this.fundHouses.has(unescape(fundHouse[1]).toLowerCase())
-                                ) {
+                                fundHouse = pdfParsedLines[i - j].match(fundHouseRegex);
+                                if (fundHouse) {
                                     currentFundHouse = unescape(fundHouse[1]);
                                 }
                                 pageBreak = 0;
@@ -338,35 +341,43 @@ class CamsPDFParser extends PDFParser {
     // parse transation line
     _parseTransactionLine(transaction) {
         let extracter = {
-            TxnDate: /^(\d+)#-#(\w+)#-#(\d+)#/,
-            TxnNumbers: /#([-\d]+\.\d+)#([-\d]+\.\d+)#(\d+\.\d+)#(\d+\.\d+)#$/,
-            NoTxnText: '*** No transactions during this statement period ***#'
+            TxnDate: /^(\d+)-(\w+)-(\d+)#/,
+            TxnNumbers: /#([(\d]+\.[\d)]+)#([(\d]+\.[\d)]+)#(\d+\.\d+)#([(\d]+\.[\d)]+)#$/,
+            NoTxnText: /^\s*\*\*\*([^*]*)/
         };
 
-        if (transaction == extracter.NoTxnText) {
-            return;
-        }
-        // removing comma charecters in figures
-        let txnLine = transaction.replace(/#,#/g, '').replace(/#\.#/g, '.');
-        // parsing -ve values
-        txnLine = txnLine.replace(/(\(#)(\d+\.\d+)(#\))/g, function(match, p1, p2, p3) {
-            return '-' + p2
-        })
-
-        let parsedTxnLine = txnLine.replace(/#/g, ' ');
-        let txnDate = txnLine.match(extracter.TxnDate);
+        // extract and remove transaction date
+        let txnDate = transaction.match(extracter.TxnDate);
         let source, date, month, year;
         if (txnDate) {
             [source, date, month, year] = txnDate;
+        } else {
+            // TODO: Not a transaction line. need to be appended with previous line.
+            return;
         }
+        let txnLine = transaction.replace(extracter.TxnDate, '');
 
-        txnLine = txnLine.replace(extracter.TxnDate, '');
+        let nonTxtText = txnLine.match(extracter.NoTxnText)
+        if (nonTxtText) {
+            return;
+        }
+        
+        // removing comma charecters in figures
+        txnLine = txnLine.replace(/(\d),(\d)/g, "$1$2")
 
+        let parsedTxnLine = txnLine.replace(/#/g, ' ');
+        
         let txnNumbers = txnLine.match(extracter.TxnNumbers);
         let amount, units, price, unitBalance;
         if (txnNumbers) {
             [source, amount, units, price, unitBalance] = txnNumbers;
+
+            // parsing -ve values
+            amount = amount.replace('(','-').replace (')','')
+            units = units.replace('(','-').replace (')','')
+            unitBalance = unitBalance.replace('(','-').replace (')','')
         }
+        
         txnLine = txnLine.replace(extracter.TxnNumbers, '');
         txnLine = txnLine.replace(/#/g, '');
 
@@ -406,21 +417,49 @@ class CamsPDFParser extends PDFParser {
 
     }
 
-    _extractFundInfo(fundHouse = '', fundLine) {
+    _extractFundInfo(fundHouse = '', fundLine1, fundLine2) {
         let extracter = {
-            Fund: /^(([^-]*)-(.*))\(Advisor: ([^(]*)\)#Registrar : (\w+)#/
+            Fund: /^(([^-]*)-(.*))/,
+            OpeningBalance: 'Opening Unit Balance:',
+            Registrar: /(.*)Registrar :\s*(\w*)#/,
+            Advisor: /\(Advisor:[\s#]*([^()]*)\)*#/
         };
 
+        // extract Registrar info from fundline
+        let registrarInfo = fundLine1.match(extracter.Registrar);
+        let source, fundLine, registrar;
+        if (registrarInfo) {
+            [source, fundLine, registrar] = registrarInfo
+        }
+        fundLine1 = fundLine1.replace(extracter.Registrar, '');
+
+        // if fundLine2 dont have "Opening Unit Balance", then it should be considered as Fundline
+        if (fundLine2.indexOf(extracter.OpeningBalance) === -1) {
+            fundLine += fundLine2;
+        }
+
+        // extract Advisor info from fundline
+        let advisorInfo = fundLine.match(extracter.Advisor);
+        let advisor;
+        if (advisorInfo) {
+            [source, advisor] = registrarInfo
+        }
+        fundLine = fundLine.replace(extracter.Advisor, '');
+
+
         let fundInfo = fundLine.match(extracter.Fund);
-        let source, rawFundName, fundCode, fundName, advisor, registrar;
+        let rawFundName, fundCode, fundName;
         if (fundInfo) {
-            [source, rawFundName, fundCode, fundName, advisor, registrar] = fundInfo;
+            [source, rawFundName, fundCode, fundName] = fundInfo;
         }
 
         let [fundHouseFirstWord] = fundHouse.split(' ');
 
         // removing if any fundhouse specific codes in fundName
         let re = new RegExp(fundHouseFirstWord + ".*", 'gi');
+        if(!fundName) {
+            log.info('----')
+        }
         let tmp = fundName.match(re);
         if (tmp) {
             fundName = tmp[0].trim();
@@ -522,13 +561,12 @@ class CamsPDFParser extends PDFParser {
         let report = this.report;
         co(function*() {
             // Connection URL
-            let db = yield MongoClient.connect('mongodb://localhost:27017/test');
+            yield dbclient.connect();
             //console.log("Connected correctly to server");
 
-
-            let holdings = db.collection('holdings');
-            let transactions = db.collection('transactions');
-
+            const database = dbclient.db(config.mongodb.mutualfundDB);
+            const holdings = database.collection('holdings');
+            const transactions = database.collection('transactions');
 
             let pans = Object.keys(report.folios);
             for (let i = 0; i < pans.length; i++) {
@@ -555,15 +593,18 @@ class CamsPDFParser extends PDFParser {
                         // Insert a fund Info to holdingfunds
                         let r = yield holdings.findOneAndUpdate(
                             filter,
-                            Object.assign(filter, {
-                                fundhouse: update.fundhouse,
-                                rawfundname: update.rawfundname,
-                                registrar: update.registrar,
-                                advisor: update.advisor
-                            }), {
+                            { 
+                                $set: Object.assign(filter, {
+                                    fundhouse: update.fundhouse,
+                                    rawfundname: update.rawfundname,
+                                    registrar: update.registrar,
+                                    advisor: update.advisor
+                                })
+                            }, {
                                 projection: {
                                     '_id': 1
                                 },
+                                returnNewDocument: true,
                                 returnOriginal: false,
                                 upsert: true
                             }
@@ -611,8 +652,9 @@ class CamsPDFParser extends PDFParser {
                     };
                 };
             };
-            db.close();
+            dbclient.close();
         }).catch(function(err) {
+            dbclient.close();
             console.log(err.stack);
         });
     }

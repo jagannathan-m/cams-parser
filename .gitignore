@@ -1,0 +1,10 @@
+node_modules/
+samplereports/
+data/
+mongoqueries
+.DS_Store
+.vscode/
+.yarnclean
+parse_jagan.js
+parse_malli.js
+parse_preetha.js

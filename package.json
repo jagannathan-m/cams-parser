@@ -1,0 +1,17 @@
+{
+  "name": "cams-parser",
+  "version": "1.0.0",
+  "description": "Parsing CAMS consolidated statement",
+  "main": "index.js",
+  "repository": "https://github.com/nathansmj/cams-parser.git",
+  "author": "nathansmj@gmail.com",
+  "license": "MIT",
+  "dependencies": {
+    "co": "^4.6.0",
+    "config": "^3.3.2",
+    "loglevel": "^1.7.0",
+    "mongodb": "^3.6.3",
+    "pdf2json": "https://github.com/nathansmj/pdf2json.git",
+    "request": "^2.88.2"
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "mongodb": {
+  "postgres": {
     "uri": "mongodb://localhost:27017/",
     "mutualfundDB": "mutualfund"
   }

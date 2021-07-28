@@ -3,11 +3,10 @@ const fs = require('fs'),
     log = require("loglevel"),
     MongoClient = require('mongodb').MongoClient,
     co = require('co'),
-    assert = require('assert'),
-    config = require('config');
+    assert = require('assert');
 
-    const mongodb_uri = config.mongodb.uri;
-const dbclient = new MongoClient(mongodb_uri, { useUnifiedTopology: true });
+// const mongodb_uri = config.mongodb.uri;
+// const dbclient = new MongoClient(mongodb_uri, { useUnifiedTopology: true });
 
 class CamsPDFParser extends PDFParser {
     constructor({
@@ -23,7 +22,6 @@ class CamsPDFParser extends PDFParser {
         this.password = password;
         this.suppressNoTxnFolio = suppressNoTxnFolio;
 
-        this._setFundHouses();
         this.supportedVersions = new Set([
             'V3.4'
         ]);
@@ -57,26 +55,35 @@ class CamsPDFParser extends PDFParser {
                 totalValuation = 0;
 
             let pans = Object.keys(this.report.folios);
+            console.log(`##|fundhouse|folio#|pan|fundcode|fundname|date|transaction desc|amount|units|price|unitBalance`);
 
             pans.forEach(pan => {
                 let folios = Object.keys(this.report.folios[pan]);
                 folios.forEach(folio => {
                     let funds = Object.keys(this.report.folios[pan][folio]);
                     funds.forEach(fund => {
-                        let closingBalance = 0,
-                            reportValue = 0;
 
                         let fundHash = this.report.folios[pan][folio][fund];
                         console.log(`${fundHash.fundhouse} \nFolio No: ${folio} \t PAN: ${pan}`);
                         console.log(`${fund}-${fundHash.fundname} (Advisor: ${fundHash.advisor}) \t Registrar: ${fundHash.registrar}`);
+                        let printTxnsTable = [];
                         fundHash.transaction.forEach(txn => {
-                            console.log(`${txn.date}  ${txn.transaction}  ${txn.amount} \t ${txn.units} \t ${txn.price} \t ${txn.unitBalance}`);
-                            closingBalance += parseFloat(txn.units);
+                            printTxnsTable.push({
+                                "Date": txn.date,
+                                "Transaction": txn.transaction,
+                                "Amount": txn.amount,
+                                "Units": txn.units,
+                                "Price": txn.price,
+                                "Unit Balance": txn.unitBalance
+                            });
+                            // console.log(`##|${fundHash.fundhouse}|${folio}|${pan}|${fund}|${fundHash.fundname}|${txn.date}|${txn.transaction}|${txn.amount}|${txn.units}|${txn.price}|${txn.unitBalance}`);
                         });
-                        console.log(`Closing Balance: ${closingBalance.toFixed(3)} \t NAV on ${this.report.period.enddate}: INR ${fundHash.nav}`);
+                        console.table(printTxnsTable);
+                        console.log(`Closing Balance: ${fundHash.closingbalance} \t NAV on ${this.report.period.enddate}: INR ${fundHash.nav} \t Valuation on ${this.report.period.enddate}: INR ${fundHash.reportvalue}`);
 
                         totalTransactionsCount += fundHash.transaction.length;
                         totalValuation += parseFloat(fundHash.reportvalue)
+
                         console.log('--'.repeat(20));
                     });
                 });
@@ -86,7 +93,7 @@ class CamsPDFParser extends PDFParser {
             console.log('=='.repeat(20));
         }
         // console.log(JSON.stringify(this.report, undefined, 2));
-        this.updateDB();
+        //this.updateDB();
     }
 
     // parse the json returned by parseTextLine
@@ -163,25 +170,26 @@ class CamsPDFParser extends PDFParser {
             } = this._extractClosingBalanceNAV(block[block.length - 1]);
 
             let txnArray = [];
+            let runningBalance = openingBalance;
             for (let i = 4; i < block.length - 1; i++) {
                 let txn = this._parseTransactionLine(block[i]);
                 if (!txn) {
                     continue;
                 }
-                if ((parseFloat(txn.unitBalance) - parseFloat(openingBalance) - parseFloat(txn.units)).toFixed() != 0) {
+                if ((parseFloat(txn.unitBalance) - parseFloat(runningBalance) - parseFloat(txn.units)).toFixed() != 0) {
                     log.warn('Unable to balance the transaction line <' + txn.txnline + '> for fund "' + rawFundName + '"')
                 }
 
                 txnArray.push(txn);
                 if (txn.units) {
-                    openingBalance = parseFloat(openingBalance) + parseFloat(txn.units);
+                    runningBalance = parseFloat(runningBalance) + parseFloat(txn.units);
                 }
             }
 
             if (this.suppressNoTxnFolio === true && txnArray.length === 0) {
                 continue;
             }
-            if ((parseFloat(openingBalance) - parseFloat(closingBalance)).toFixed() != 0) {
+            if ((parseFloat(runningBalance) - parseFloat(closingBalance)).toFixed() != 0) {
                 log.warn('Could not reconcile closing balance. Some parse some transaction for the fund "' + rawFundName + '"');
             }
 
@@ -193,7 +201,9 @@ class CamsPDFParser extends PDFParser {
                 'advisor': advisor,
                 'nav': nav,
                 'reportvalue': reportValue,
-                'transaction': txnArray
+                'transaction': txnArray,
+                'openingbalance': openingBalance,
+                'closingbalance': closingBalance
             };
 
             this._setReportFolio({
@@ -234,12 +244,6 @@ class CamsPDFParser extends PDFParser {
         if (email) {
             this.report['email'] = email[1];
         }
-    }
-
-    // loads the fundhouse_list.json
-    _setFundHouses() {
-        let fundHouses = require('./fundhouse_list.json');
-        this.fundHouses = new Set(fundHouses);
     }
 
     // merge same line texts
@@ -555,108 +559,6 @@ class CamsPDFParser extends PDFParser {
             return true;
         }
         return false;
-    }
-
-    updateDB() {
-        let report = this.report;
-        co(function*() {
-            // Connection URL
-            yield dbclient.connect();
-            //console.log("Connected correctly to server");
-
-            const database = dbclient.db(config.mongodb.mutualfundDB);
-            const holdings = database.collection('holdings');
-            const transactions = database.collection('transactions');
-
-            let pans = Object.keys(report.folios);
-            for (let i = 0; i < pans.length; i++) {
-                let pan = pans[i];
-                let folioNums = Object.keys(report.folios[pan]);
-
-                //folioNums.forEach(folioNum => {
-                for (let i = 0; i < folioNums.length; i++) {
-                    let folioNum = folioNums[i];
-                    let fundCodes = Object.keys(report.folios[pan][folioNum]);
-
-                    // fundCodes.forEach(fundCode => {
-                    for (let i = 0; i < fundCodes.length; i++) {
-                        let fundCode = fundCodes[i];
-                        let update = report.folios[pan][folioNum][fundCode];
-                        let filter = {
-                            email: report.email,
-                            pan: pan,
-                            folionumber: folioNum,
-                            fundcode: fundCode,
-                            fundname: update.fundname
-                        };
-
-                        // Insert a fund Info to holdingfunds
-                        let r = yield holdings.findOneAndUpdate(
-                            filter,
-                            { 
-                                $set: Object.assign(filter, {
-                                    fundhouse: update.fundhouse,
-                                    rawfundname: update.rawfundname,
-                                    registrar: update.registrar,
-                                    advisor: update.advisor
-                                })
-                            }, {
-                                projection: {
-                                    '_id': 1
-                                },
-                                returnNewDocument: true,
-                                returnOriginal: false,
-                                upsert: true
-                            }
-                        );
-
-                        let currentHoldingId = r.value._id;
-                        let txns = update.transaction;
-                        let docModifiedStat = {
-                            updated: 0,
-                            inserted: 0
-                        };
-                        for (let i = 0; i < txns.length; i++) {
-                            let txn = txns[i];
-                            
-                            // update transactions
-                            let r = yield transactions.updateOne({
-                                date: new Date(txn.date),
-                                amount: parseFloat(txn.amount),
-                                unitbalance: parseFloat(txn.unitBalance),
-                                transaction: txn.transaction
-                            }, {
-                                $set: {
-                                    date: txn.date,
-                                    amount: parseFloat(txn.amount),
-                                    unitbalance: parseFloat(txn.unitBalance),
-                                    txnline: txn.txnline,
-                                    date: new Date(txn.date),
-                                    transaction: txn.transaction,
-                                    units: parseFloat(txn.units),
-                                    price: parseFloat(txn.price),
-                                    holdingsid: currentHoldingId
-                                }
-                            }, {
-                                upsert: true
-                            });
-                            //console.log(r.result);
-                            if (r.result.nModified) {
-                                docModifiedStat.updated += r.result.nModified;
-                            } else if (r.result.upserted) {
-                                docModifiedStat.inserted++;
-                            }
-                            
-                        }
-                        log.info(`Transaction Inserted ${docModifiedStat.inserted}; Updated: ${docModifiedStat.updated} : ${report.email}-${pan}-${fundCode}-${update.fundname}`)
-                    };
-                };
-            };
-            dbclient.close();
-        }).catch(function(err) {
-            dbclient.close();
-            console.log(err.stack);
-        });
     }
 }
 

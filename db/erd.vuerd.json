@@ -1,0 +1,995 @@
+{
+  "canvas": {
+    "version": "2.2.0",
+    "width": 2000,
+    "height": 2000,
+    "scrollTop": -241,
+    "scrollLeft": 0,
+    "zoomLevel": 1,
+    "show": {
+      "tableComment": true,
+      "columnComment": true,
+      "columnDataType": true,
+      "columnDefault": true,
+      "columnAutoIncrement": false,
+      "columnPrimaryKey": true,
+      "columnUnique": false,
+      "columnNotNull": true,
+      "relationship": true
+    },
+    "database": "PostgreSQL",
+    "databaseName": "mutual_fund",
+    "canvasType": "ERD",
+    "language": "GraphQL",
+    "tableCase": "pascalCase",
+    "columnCase": "camelCase",
+    "highlightTheme": "VS2015",
+    "bracketType": "none",
+    "setting": {
+      "relationshipDataTypeSync": true,
+      "columnOrder": [
+        "columnName",
+        "columnDataType",
+        "columnNotNull",
+        "columnUnique",
+        "columnAutoIncrement",
+        "columnDefault",
+        "columnComment"
+      ]
+    }
+  },
+  "table": {
+    "tables": [
+      {
+        "name": "investor_profile",
+        "comment": "basic information about an investor",
+        "columns": [
+          {
+            "name": "id",
+            "comment": "",
+            "dataType": "bigserial",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": true,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": true,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "3b24439a-d249-4598-ab8d-56b42a2ab627"
+          },
+          {
+            "name": "first_name",
+            "comment": "",
+            "dataType": "varchar",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 63,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "0ae0096d-ceac-4e73-8b5e-b480d09b1990"
+          },
+          {
+            "name": "middle_name",
+            "comment": "",
+            "dataType": "varchar",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": false
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 80,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "4da80541-494a-4906-95f7-2f2d944c2c0f"
+          },
+          {
+            "name": "last_name",
+            "comment": "",
+            "dataType": "varchar",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": false
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 62,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "c8ed32a5-51a6-4a14-9dcf-17f3f57f21d5"
+          },
+          {
+            "name": "pan",
+            "comment": "",
+            "dataType": "varchar",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": false
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "46991f06-5e29-4a08-abe0-0b6a88afb150"
+          },
+          {
+            "name": "email",
+            "comment": "",
+            "dataType": "varchar",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": false
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "2ccae3bd-1b2d-4d77-88cc-1458e03f7dad"
+          },
+          {
+            "name": "uuid",
+            "comment": "",
+            "dataType": "uuid",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": false
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "243d8d7e-aa9b-470d-bb74-790db8cd9465"
+          }
+        ],
+        "ui": {
+          "active": false,
+          "left": 129,
+          "top": 72,
+          "zIndex": 361,
+          "widthName": 90,
+          "widthComment": 120
+        },
+        "visible": true,
+        "id": "624e4b74-900b-468e-9c3a-070a82980c0a"
+      },
+      {
+        "name": "mf_folio",
+        "comment": "Mutual Fund folio detail",
+        "columns": [
+          {
+            "name": "id",
+            "comment": "",
+            "dataType": "bigserial",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": true,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": true,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "d932d8d3-3a4a-423d-ac9b-bd11dbc59290"
+          },
+          {
+            "name": "folio_no",
+            "comment": "",
+            "dataType": "bigint",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "5eed7962-94a0-4a00-9c4b-864aedfb65ce"
+          },
+          {
+            "name": "investor_profile_id",
+            "comment": "",
+            "dataType": "bigserial",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": true,
+              "pfk": false,
+              "widthName": 108,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "24811a74-3177-40a6-b8b8-dbfe3fc79b41"
+          },
+          {
+            "name": "fund_house_id",
+            "comment": "",
+            "dataType": "bigserial",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": true,
+              "pfk": false,
+              "widthName": 87,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "2e9f48e4-6cd7-4807-a4d8-801046852b69"
+          }
+        ],
+        "ui": {
+          "active": false,
+          "left": 127.8896,
+          "top": 407.445,
+          "zIndex": 541,
+          "widthName": 60,
+          "widthComment": 120
+        },
+        "visible": true,
+        "id": "d5931200-47e4-4c00-842f-806df6f190a2"
+      },
+      {
+        "name": "mf_house",
+        "comment": "List of mutual fund houses",
+        "columns": [
+          {
+            "name": "id",
+            "comment": "",
+            "dataType": "bigserial",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": true,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": true,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "4722b7f2-99cc-4148-925a-d81a79a098ed"
+          },
+          {
+            "name": "name",
+            "comment": "",
+            "dataType": "varchar",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "6e3fb171-ebdf-4a4a-ad34-aadb991f8a80"
+          }
+        ],
+        "ui": {
+          "active": false,
+          "left": 677,
+          "top": 71,
+          "zIndex": 538,
+          "widthName": 60,
+          "widthComment": 120
+        },
+        "visible": true,
+        "id": "c9ea82b3-272b-4910-b970-53592e5aa34e"
+      },
+      {
+        "name": "mf_instrument",
+        "comment": "List of mutual_fund_name",
+        "columns": [
+          {
+            "name": "id",
+            "comment": "",
+            "dataType": "bigserial",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": true,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": true,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "f19418ca-a5e5-49d0-95f5-a0538d7eb37b"
+          },
+          {
+            "name": "fund_house_id",
+            "comment": "",
+            "dataType": "bigserial",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": true,
+              "pfk": false,
+              "widthName": 87,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "67a32c38-e803-4e95-a094-0816b9a13609"
+          },
+          {
+            "name": "fund_name",
+            "comment": "",
+            "dataType": "varchar",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 67,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "2dcd4ea8-98a9-4520-a178-e493f060d441"
+          }
+        ],
+        "ui": {
+          "active": false,
+          "left": 662,
+          "top": 403,
+          "zIndex": 539,
+          "widthName": 84,
+          "widthComment": 120
+        },
+        "visible": true,
+        "id": "fa52c240-bffd-4f7e-b2b0-96aaed91dfcc"
+      },
+      {
+        "name": "mf_transactions",
+        "comment": "Transaction in a Mutual fund",
+        "columns": [
+          {
+            "name": "id",
+            "comment": "",
+            "dataType": "bigserial",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "2c210566-e1d9-4264-8fed-a705f71c2eb9"
+          },
+          {
+            "name": "mf_folio_id",
+            "comment": "",
+            "dataType": "bigserial",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": true,
+              "pfk": false,
+              "widthName": 65,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "b5578f88-be0f-4721-9dd7-64b0fd7f6d3b"
+          },
+          {
+            "name": "mf_instrument_id",
+            "comment": "",
+            "dataType": "bigserial",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": true,
+              "pfk": false,
+              "widthName": 102,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "ec7533fc-d28a-44a4-8e79-ebadf0b1abce"
+          },
+          {
+            "name": "date",
+            "comment": "",
+            "dataType": "date",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "d832f177-0780-4287-873f-aafcb7d22a12"
+          },
+          {
+            "name": "transaction_detail",
+            "comment": "",
+            "dataType": "varchar",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": false
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 104,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "549401d8-f5d1-4552-a00a-d99a5d5271e9"
+          },
+          {
+            "name": "amount",
+            "comment": "",
+            "dataType": "numeric(12,2)",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": false
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 82,
+              "widthDefault": 60
+            },
+            "id": "da4205e9-6da7-448a-b20f-910d6faaa827"
+          },
+          {
+            "name": "units",
+            "comment": "",
+            "dataType": "numeric",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": false
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "a2c3cda5-adae-45e2-9ff2-2a739facbfa3"
+          },
+          {
+            "name": "price",
+            "comment": "",
+            "dataType": "numeric(12,2)",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": false
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 82,
+              "widthDefault": 60
+            },
+            "id": "a0c99157-ef56-4aee-ac19-b12122cebd41"
+          },
+          {
+            "name": "unit_balance",
+            "comment": "",
+            "dataType": "numeric",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": false
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 76,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "c495f45f-2114-49d7-afc0-36cb6ceddf98"
+          },
+          {
+            "name": "checksum",
+            "comment": "",
+            "dataType": "varchar",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": false
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 61,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "1a9b049e-6000-4588-a454-24efdeadd0dc"
+          }
+        ],
+        "ui": {
+          "active": false,
+          "left": 122,
+          "top": 693,
+          "zIndex": 548,
+          "widthName": 94,
+          "widthComment": 120
+        },
+        "visible": true,
+        "id": "734ae20a-f9dc-491a-a402-b0ef15974f98"
+      },
+      {
+        "name": "mf_nav",
+        "comment": "NAV details of a mutual fund",
+        "columns": [
+          {
+            "name": "id",
+            "comment": "",
+            "dataType": "bigserial",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "d0457d80-1609-4fd6-8834-65a1a79a30e1"
+          },
+          {
+            "name": "date",
+            "comment": "",
+            "dataType": "date",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "27e1f9af-a375-45b1-b4a2-bea569ab07f5"
+          },
+          {
+            "name": "nav",
+            "comment": "",
+            "dataType": "numeric(12,2)",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 82,
+              "widthDefault": 60
+            },
+            "id": "d3b4b1e0-ca99-4e10-b45d-d1c30f424e1c"
+          },
+          {
+            "name": "mf_instrument_id",
+            "comment": "",
+            "dataType": "bigserial",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": true,
+              "pfk": false,
+              "widthName": 102,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "f63f29e1-b3a4-4be3-bef9-e864d9b5a722"
+          }
+        ],
+        "ui": {
+          "active": false,
+          "left": 644.7775,
+          "top": 703.5557,
+          "zIndex": 540,
+          "widthName": 60,
+          "widthComment": 120
+        },
+        "visible": true,
+        "id": "e27310a8-60de-49bb-babb-57dbd396c922"
+      }
+    ],
+    "indexes": []
+  },
+  "memo": {
+    "memos": []
+  },
+  "relationship": {
+    "relationships": [
+      {
+        "identification": false,
+        "relationshipType": "OneN",
+        "startRelationshipType": "Dash",
+        "start": {
+          "tableId": "624e4b74-900b-468e-9c3a-070a82980c0a",
+          "columnIds": [
+            "3b24439a-d249-4598-ab8d-56b42a2ab627"
+          ],
+          "x": 312.5,
+          "y": 284.5,
+          "direction": "bottom"
+        },
+        "end": {
+          "tableId": "d5931200-47e4-4c00-842f-806df6f190a2",
+          "columnIds": [
+            "24811a74-3177-40a6-b8b8-dbfe3fc79b41"
+          ],
+          "x": 325.3896,
+          "y": 407.445,
+          "direction": "top"
+        },
+        "constraintName": "fk_investor_profile_to_mf_folio",
+        "visible": true,
+        "id": "20669d34-1013-4365-8896-c3ef3167133f"
+      },
+      {
+        "identification": false,
+        "relationshipType": "OneN",
+        "startRelationshipType": "Dash",
+        "start": {
+          "tableId": "c9ea82b3-272b-4910-b970-53592e5aa34e",
+          "columnIds": [
+            "4722b7f2-99cc-4148-925a-d81a79a098ed"
+          ],
+          "x": 850.5,
+          "y": 181,
+          "direction": "bottom"
+        },
+        "end": {
+          "tableId": "fa52c240-bffd-4f7e-b2b0-96aaed91dfcc",
+          "columnIds": [
+            "67a32c38-e803-4e95-a094-0816b9a13609"
+          ],
+          "x": 849,
+          "y": 403,
+          "direction": "top"
+        },
+        "constraintName": "fk_fund_house_to_fund_name",
+        "visible": true,
+        "id": "a5196c2e-d8ef-45bc-93dd-fea3e208b821"
+      },
+      {
+        "identification": false,
+        "relationshipType": "OneN",
+        "startRelationshipType": "Dash",
+        "start": {
+          "tableId": "c9ea82b3-272b-4910-b970-53592e5aa34e",
+          "columnIds": [
+            "4722b7f2-99cc-4148-925a-d81a79a098ed"
+          ],
+          "x": 677,
+          "y": 126,
+          "direction": "left"
+        },
+        "end": {
+          "tableId": "d5931200-47e4-4c00-842f-806df6f190a2",
+          "columnIds": [
+            "2e9f48e4-6cd7-4807-a4d8-801046852b69"
+          ],
+          "x": 522.8896,
+          "y": 482.945,
+          "direction": "right"
+        },
+        "constraintName": "fk_fund_house_to_mf_folio",
+        "visible": true,
+        "id": "c7509255-6b58-4121-acf6-a893978d2ba1"
+      },
+      {
+        "identification": false,
+        "relationshipType": "OneN",
+        "startRelationshipType": "Dash",
+        "start": {
+          "tableId": "d5931200-47e4-4c00-842f-806df6f190a2",
+          "columnIds": [
+            "d932d8d3-3a4a-423d-ac9b-bd11dbc59290"
+          ],
+          "x": 325.3896,
+          "y": 558.4449999999999,
+          "direction": "bottom"
+        },
+        "end": {
+          "tableId": "734ae20a-f9dc-491a-a402-b0ef15974f98",
+          "columnIds": [
+            "b5578f88-be0f-4721-9dd7-64b0fd7f6d3b"
+          ],
+          "x": 328.5,
+          "y": 693,
+          "direction": "top"
+        },
+        "constraintName": "fk_mf_folio_to_mf_transactions",
+        "visible": true,
+        "id": "ae4f492c-3bc4-4b35-94f6-94d5641c2c84"
+      },
+      {
+        "identification": false,
+        "relationshipType": "OneN",
+        "startRelationshipType": "Dash",
+        "start": {
+          "tableId": "fa52c240-bffd-4f7e-b2b0-96aaed91dfcc",
+          "columnIds": [
+            "f19418ca-a5e5-49d0-95f5-a0538d7eb37b"
+          ],
+          "x": 662,
+          "y": 468.25,
+          "direction": "left"
+        },
+        "end": {
+          "tableId": "734ae20a-f9dc-491a-a402-b0ef15974f98",
+          "columnIds": [
+            "ec7533fc-d28a-44a4-8e79-ebadf0b1abce"
+          ],
+          "x": 535,
+          "y": 830,
+          "direction": "right"
+        },
+        "constraintName": "fk_fund_name_to_mf_transactions",
+        "visible": true,
+        "id": "b2bf2237-7fad-45a4-8375-3e8928c91a0b"
+      },
+      {
+        "identification": false,
+        "relationshipType": "OneN",
+        "startRelationshipType": "Dash",
+        "start": {
+          "tableId": "fa52c240-bffd-4f7e-b2b0-96aaed91dfcc",
+          "columnIds": [
+            "f19418ca-a5e5-49d0-95f5-a0538d7eb37b"
+          ],
+          "x": 849,
+          "y": 533.5,
+          "direction": "bottom"
+        },
+        "end": {
+          "tableId": "e27310a8-60de-49bb-babb-57dbd396c922",
+          "columnIds": [
+            "f63f29e1-b3a4-4be3-bef9-e864d9b5a722"
+          ],
+          "x": 850.2775,
+          "y": 703.5557,
+          "direction": "top"
+        },
+        "constraintName": "fk_mf_instrument_to_mf_nav",
+        "visible": true,
+        "id": "7a6b7ce0-a7e3-4509-ab33-030c5b3f0e16"
+      }
+    ]
+  }
+}

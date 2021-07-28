@@ -6,6 +6,7 @@ const log = require("loglevel"),
 
 const mongodb_uri = config.mongodb.uri;
 const dbclient = new MongoClient(mongodb_uri, { useUnifiedTopology: true });
+const cliProgress = require('cli-progress');
 
 const AMFI_FROM_TO_NAV_URL = 'http://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?frmdt=###dd-mmm-yyyy###&todt=###dd-mmm-yyyy###';
 const AMFI_CURRENT_NAV_URL = 'https://www.amfiindia.com/spages/NAVAll.txt';
@@ -29,10 +30,10 @@ class AmfiNAVParser {
         if (navURL) {
             log.debug( `${this.constructor.name} - Custom NAV URL passed. Start and End dates will be ignored` );
             this.setNavURL(navURL)
-        } else if (startDate || endDate) {
+        } else if (startDate) {
             let dateArgs = {
                 startDate: new Date(startDate),
-                endDate: new Date(endDate)
+                endDate: endDate ? new Date(endDate) : new Date()
             }
             for (let datePrefix of ['start', 'end']) {
                 let dateStr = datePrefix+'Date';
@@ -178,17 +179,17 @@ class AmfiNAVParser {
                     log.debug( `${this.constructor.name} - sample NAV line : ${navLine}` );
                 }
                 
-                let [amfiCode, schemeName, ISIN, ISINReinv, nav, repurchasePrice, salePrice, date] = []
+                let [amfiCode, fundName, ISIN, ISINReinv, nav, repurchasePrice, salePrice, date] = []
                 if (navContentType == 'date-range') {
-                    [amfiCode, schemeName, ISIN, ISINReinv, nav, repurchasePrice, salePrice, date] = navLine.split(';');
+                    [amfiCode, fundName, ISIN, ISINReinv, nav, repurchasePrice, salePrice, date] = navLine.split(';');
                 } else if (navContentType == 'current') {
-                    [amfiCode, ISIN, ISINReinv, schemeName, nav, date] = navLine.split(';');
+                    [amfiCode, ISIN, ISINReinv, fundName, nav, date] = navLine.split(';');
                 }
                 navHash.push({
                     fundhouse: currentFundHouse,
                     fundscheme: currentFundScheme,
                     amfiCode: amfiCode,
-                    schemename: schemeName,
+                    fundname: fundName,
                     isin: ISIN,
                     isinreinv: ISINReinv,
                     nav: nav,
@@ -212,20 +213,23 @@ class AmfiNAVParser {
           const fundsnavhistory = database.collection("mutualfundnavs");
           const mutualfunds = database.collection("mutualfunds");
           let docModifiedStat = { updated: 0, inserted: 0 };
+          
+          const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+          bar1.start(this.navContent.length, 0);
           for (let i = 0; i < this.navContent.length; i++) {
     
             let navDetail = this.navContent[i];
             // create a filter for a movie to update
 
             let r = await mutualfunds.findOneAndUpdate(
-                { amfiCode: navDetail.amfiCode },
+                { amfi_code: navDetail.amfiCode },
                 { $set: {
-                    amfiCode: navDetail.amfiCode,
-                    fundhouse: navDetail.fundhouse,
-                    fundscheme: navDetail.fundscheme,
-                    schemename: navDetail.schemename,
+                    amfi_code: navDetail.amfiCode,
+                    fund_house: navDetail.fundhouse,
+                    fund_scheme: navDetail.fundscheme,
+                    fund_name: navDetail.fundname,
                     isin: navDetail.isin,
-                    isinreinv: navDetail.isinreinv
+                    isin_reinv: navDetail.isinreinv
                 }},
                 {
                     projection: {
@@ -245,8 +249,8 @@ class AmfiNAVParser {
                 $set: {
                     mutualfundsid: currentFundId,
                     nav: navDetail.nav,
-                    repurchasePrice: navDetail.repurchasePrice,
-                    salePrice: navDetail.salePrice,
+                    repurchase_price: navDetail.repurchasePrice,
+                    sale_price: navDetail.salePrice,
                     date: navDetail.date // IST Offset to make the GMT value to same date.
                 }
             };
@@ -257,12 +261,15 @@ class AmfiNAVParser {
             } else if (r.result.upserted) {
                 docModifiedStat.inserted++;
             }
+
+            bar1.update(i);
           }
           log.info(`NAVs Inserted ${docModifiedStat.inserted}; Updated: ${docModifiedStat.updated}`)
         } catch (err) {
             log.error("Error while update Database: "+ err);
         } finally {
           await dbclient.close();
+          bar1.stop();
         }
       }
 }

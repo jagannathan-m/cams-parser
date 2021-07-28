@@ -1,4 +1,4 @@
-var amfiMap = require('./map_amfi_cams_codes.json');
+var amfiMap = require('../map_amfi_cams_codes.json');
 
 let mongo = require('mongodb'),
 	MongoClient = mongo.MongoClient,

@@ -2,8 +2,12 @@ let MongoClient = require('mongodb').MongoClient,
     assert = require('assert'),
     co = require('co'),
     moment = require('moment'),
-    _ = require('underscore');
+    _ = require('underscore'),
+    config = require('config');
 
+const mongodb_uri = config.mongodb.uri;
+const dbclient = new MongoClient(mongodb_uri, { useUnifiedTopology: true });
+    
 function momentXIRR(values, dates, guess) {
     //https://gist.github.com/ghalimi/4669712
     // Credits: algorithm inspired by Apache OpenOffice
@@ -71,14 +75,15 @@ function momentXIRR(values, dates, guess) {
 
 co(function*() { try {
     // Connection URL
-    let db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    let dbclient = yield dbclient.connect();
+
     //console.log("Connected correctly to server");
 
     let investmentTillDate = process.argv[2] ? new Date(process.argv[2]) : new Date(); 
 
-    let holdings = db.collection('holdings');
-    let transactions = db.collection('transactions');
-    let amfinav = db.collection('amfinav');
+    let holdings = dbclient.collection('holdings');
+    let transactions = dbclient.collection('transactions');
+    let amfinav = dbclient.collection('amfinav');
 
     // getting all interested holdings for XIRR calculation
     let xirrFunds = yield holdings.find({
@@ -179,7 +184,7 @@ co(function*() { try {
     let overallXIRR = momentXIRR([...fundAggregate.txnFlows, fundAggregate.totalValue], [...fundAggregate.txnDates, fundAggregate.xirrDate]);
     console.log (`Valuation on: ${fundAggregate.xirrDate.toDateString()} for Investment till ${investmentTillDate.toDateString()}; Total value; ${fundAggregate.totalValue} | overall XIRR; ${(overallXIRR*100).toFixed(2)}%`)
     console.log ('---------------------------------');
-    db.close()
+    dbclient.close()
 } catch(e) {
   console.log(e);
 }});

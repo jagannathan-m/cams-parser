@@ -3,7 +3,8 @@ const fs = require('fs'),
     log = require("loglevel"),
     MongoClient = require('mongodb').MongoClient,
     co = require('co'),
-    assert = require('assert');
+    assert = require('assert'),
+    nodeEvents = require("events");
 
 // const mongodb_uri = config.mongodb.uri;
 // const dbclient = new MongoClient(mongodb_uri, { useUnifiedTopology: true });
@@ -29,13 +30,19 @@ class CamsPDFParser extends PDFParser {
             'folios': {}
         };
 
-        this.on("pdfParser_dataError", errData => console.error(errData.parserError));
-        this.on("pdfParser_dataReady", pdfData => {
+        this.promise = new(nodeEvents.EventEmitter);
+        this.on("pdfParser_dataError", (errData) => {
+            console.error(errData.parserError);
+            this.promise.emit('error', new Error(errData.parserError));
+        });
+        this.on("pdfParser_dataReady", (pdfData) => {
             log.info(`Processing file : ${this.filePath}`);
             this.postProcess(pdfData);
         });
-
+    // }
+    // parsePDF() {
         this.loadPDF(this.filePath, 0, this.password);
+        return this.promise;
     }
 
     // pdf2json post process
@@ -92,7 +99,8 @@ class CamsPDFParser extends PDFParser {
             log.debug(`Total value as of ${this.report.period.enddate} is ${totalValuation}`);
             console.log('=='.repeat(20));
         }
-        // console.log(JSON.stringify(this.report, undefined, 2));
+        console.log(JSON.stringify(this.report, undefined, 2));
+        this.promise.emit('success', this.report);
         //this.updateDB();
     }
 
@@ -243,6 +251,12 @@ class CamsPDFParser extends PDFParser {
         let email = unescape(pdfParsedLines[1]).match(emailExtractor);
         if (email) {
             this.report['email'] = email[1];
+        }
+
+        let investorNameExtractor = /^([^#]*)/;
+        let investorName = unescape(pdfParsedLines[3]).match(investorNameExtractor);
+        if (email) {
+            this.report['investorname'] = investorName[1];
         }
     }
 

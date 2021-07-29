@@ -210,7 +210,7 @@
           "active": false,
           "left": 129,
           "top": 72,
-          "zIndex": 361,
+          "zIndex": 1,
           "widthName": 90,
           "widthComment": 120
         },
@@ -318,7 +318,7 @@
           "active": false,
           "left": 127.8896,
           "top": 407.445,
-          "zIndex": 541,
+          "zIndex": 5,
           "widthName": 60,
           "widthComment": 120
         },
@@ -380,7 +380,7 @@
           "active": false,
           "left": 677,
           "top": 71,
-          "zIndex": 538,
+          "zIndex": 2,
           "widthName": 60,
           "widthComment": 120
         },
@@ -465,7 +465,7 @@
           "active": false,
           "left": 662,
           "top": 403,
-          "zIndex": 539,
+          "zIndex": 3,
           "widthName": 84,
           "widthComment": 120
         },
@@ -711,7 +711,7 @@
           "active": false,
           "left": 122,
           "top": 693,
-          "zIndex": 548,
+          "zIndex": 6,
           "widthName": 94,
           "widthComment": 120
         },
@@ -819,7 +819,7 @@
           "active": false,
           "left": 644.7775,
           "top": 703.5557,
-          "zIndex": 540,
+          "zIndex": 4,
           "widthName": 60,
           "widthComment": 120
         },

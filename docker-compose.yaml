@@ -1,0 +1,28 @@
+version: "3"
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: "postgres"
+    volumes:
+      - "./db/data:/db/data"
+    networks:
+     - wealth-app
+    ports:
+     - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: wealth-app
+      PGDATA: /db/data
+      POSTGRES_PASSWORD: password
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - wealth-app
+    
+networks:
+  wealth-app:

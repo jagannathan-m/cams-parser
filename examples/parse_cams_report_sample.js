@@ -8,3 +8,4 @@ pdfParser = new CamsPDFParser({
     logLevel: 'info',
     suppressNoTxnFolio: true
 });
+pdfParser.parsePDF()

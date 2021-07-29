@@ -1,12 +1,17 @@
 node_modules/
 samplereports/
 mongoqueries
+
 .DS_Store
 .vscode/
 .yarnclean
+
 parse_jagan.js
 parse_malli.js
 parse_preetha.js
+
 examples/
 !examples/parse_cams_report_sample.js
 !examples/parse_amfi_nav.js
+
+db/data
